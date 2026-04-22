@@ -1,0 +1,23 @@
+# Build output
+target/
+
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment & secrets
+.env
+application-dev.yml
+
+# Node
+node_modules/
+dist/

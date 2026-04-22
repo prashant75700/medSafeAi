@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  # ─────────────────────────────────────────────
+  # PostgreSQL
+  # ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: medsafe-postgres
+    environment:
+      POSTGRES_DB: medsafe
+      POSTGRES_USER: medsafe_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD env var is required}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medsafe_user -d medsafe"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ─────────────────────────────────────────────
+  # Spring Boot Backend
+  # ─────────────────────────────────────────────
+  backend:
+    build: .
+    container_name: medsafe-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL:       jdbc:postgresql://postgres:5432/medsafe
+      DATABASE_USERNAME:  medsafe_user
+      DATABASE_PASSWORD:  ${DB_PASSWORD}
+      JWT_SECRET:         ${JWT_SECRET:?JWT_SECRET env var is required}
+      AI_API_KEY:         ${AI_API_KEY:?AI_API_KEY env var is required}
+      MAIL_USERNAME:      ${MAIL_USERNAME}
+      MAIL_PASSWORD:      ${MAIL_PASSWORD}
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: medsafe
+  profiles:
+    active: dev
