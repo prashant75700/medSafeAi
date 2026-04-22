@@ -35,6 +35,8 @@ medsafe:
   jwt:
     secret: ${JWT_SECRET}
     expirationMs: 86400000
+  cors:
+    allowed-origins: ${MEDSAFE_CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
 ai:
   api:
