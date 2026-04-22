@@ -237,11 +237,13 @@ public class AuthController {
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return ResponseEntity.ok(Map.of(
-            "id",         user.getId(),
-            "name",       user.getName(),
-            "email",      user.getEmail(),
-            "bloodGroup", user.getBloodGroup() != null ? user.getBloodGroup() : "",
-            "phone",      user.getPhone()       != null ? user.getPhone()       : ""
+            "id",                user.getId(),
+            "name",              user.getName(),
+            "email",             user.getEmail(),
+            "bloodGroup",        user.getBloodGroup()        != null ? user.getBloodGroup()        : "",
+            "phone",             user.getPhone()             != null ? user.getPhone()             : "",
+            "allergies",         user.getAllergies()          != null ? user.getAllergies()          : "",
+            "medicalConditions", user.getMedicalConditions()  != null ? user.getMedicalConditions()  : ""
         ));
     }
 
@@ -255,8 +257,10 @@ public class AuthController {
         if (body.containsKey("name") && !body.get("name").isBlank()) {
             user.setName(body.get("name"));
         }
-        if (body.containsKey("phone"))      user.setPhone(body.get("phone"));
-        if (body.containsKey("bloodGroup")) user.setBloodGroup(body.get("bloodGroup"));
+        if (body.containsKey("phone"))             user.setPhone(body.get("phone"));
+        if (body.containsKey("bloodGroup"))         user.setBloodGroup(body.get("bloodGroup"));
+        if (body.containsKey("allergies"))           user.setAllergies(body.get("allergies"));
+        if (body.containsKey("medicalConditions"))   user.setMedicalConditions(body.get("medicalConditions"));
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("Profile updated successfully!"));
     }

@@ -298,12 +298,12 @@ export default function AuthPage() {
 
   // -- Main Auth Screen (Login / Register) --
   return (
-    <div style={{
+    <div className="auth-layout" style={{
       minHeight: '100vh', display: 'grid',
       gridTemplateColumns: '1fr 1fr',
     }}>
       {/* Left panel — branding */}
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px', gap: '32px' }}>
+      <div className="auth-branding" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', padding: '60px', gap: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img
             src="/logo.png"
@@ -342,7 +342,7 @@ export default function AuthPage() {
       </div>
 
       {/* Right panel — form */}
-      <div style={{
+      <div className="auth-form-panel" style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: '40px', background: 'rgba(0,0,0,0.3)',
         borderLeft: '1px solid rgba(255,255,255,0.06)',
@@ -494,9 +494,23 @@ export default function AuthPage() {
       )}
 
       <style>{`
-        @media (max-width: 768px) {
-          div[style*="gridTemplateColumns"] { grid-template-columns: 1fr !important; }
-          div[style*="padding: 60px"] { display: none !important; }
+        @media (max-width: 900px) {
+          .auth-layout {
+            grid-template-columns: 1fr !important;
+          }
+          .auth-branding {
+            display: none !important;
+          }
+          .auth-form-panel {
+            padding: 24px 20px !important;
+            border-left: none !important;
+            min-height: 100vh;
+            background: transparent !important;
+          }
+          .auth-form-panel > div {
+            max-width: 100% !important;
+            width: 100% !important;
+          }
         }
       `}</style>
     </div>

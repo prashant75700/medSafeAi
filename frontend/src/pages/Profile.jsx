@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { User, Phone, Mail, Lock, Save, Eye, EyeOff, ShieldCheck, Droplets } from 'lucide-react';
+import { User, Phone, Mail, Lock, Save, Eye, EyeOff, ShieldCheck, Droplets, AlertTriangle, Heart } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../api';
 
 const BLOOD_GROUPS = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
 
 export default function Profile() {
-  const [profile, setProfile]   = useState({ name:'', email:'', phone:'', bloodGroup:'' });
+  const [profile, setProfile]   = useState({ name:'', email:'', phone:'', bloodGroup:'', allergies:'', medicalConditions:'' });
   const [pwd, setPwd]           = useState({ current:'', next:'', confirm:'' });
   const [showPwd, setShowPwd]   = useState({ current:false, next:false, confirm:false });
   const [savingProfile, setSavingProfile] = useState(false);
@@ -20,7 +20,7 @@ export default function Profile() {
     // Try to fetch fresh data from backend
     api.get('/auth/me').then(res => {
       const d = res.data;
-      setProfile(p => ({ ...p, name: d.name||p.name, email: d.email||p.email, phone: d.phone||'', bloodGroup: d.bloodGroup||'' }));
+      setProfile(p => ({ ...p, name: d.name||p.name, email: d.email||p.email, phone: d.phone||'', bloodGroup: d.bloodGroup||'', allergies: d.allergies||'', medicalConditions: d.medicalConditions||'' }));
     }).catch(() => {});
   }, []);
 
@@ -28,7 +28,13 @@ export default function Profile() {
     if (!profile.name.trim()) { toast.warn('Name cannot be empty.'); return; }
     setSavingProfile(true);
     try {
-      await api.put('/auth/profile', { name: profile.name, phone: profile.phone, bloodGroup: profile.bloodGroup });
+      await api.put('/auth/profile', {
+        name: profile.name,
+        phone: profile.phone,
+        bloodGroup: profile.bloodGroup,
+        allergies: profile.allergies,
+        medicalConditions: profile.medicalConditions,
+      });
       localStorage.setItem('medsafe_profile', JSON.stringify(profile));
       toast.success('Profile saved successfully!');
     } catch { toast.error('Failed to save profile.'); }
@@ -69,7 +75,7 @@ export default function Profile() {
     <div style={{ display:'flex', flexDirection:'column', gap:'28px', maxWidth:'600px' }}>
       <div>
         <h2 style={{ marginBottom:'4px' }}>My Profile</h2>
-        <p style={{ color:'var(--text-muted)', fontSize:'0.85rem' }}>Manage your personal information and account settings</p>
+        <p style={{ color:'var(--text-muted)', fontSize:'0.85rem' }}>Manage your personal information, health details, and account settings</p>
       </div>
 
       {/* Avatar */}
@@ -126,11 +132,69 @@ export default function Profile() {
             </select>
           </div>
         </div>
-
-        <button className="btn-primary" onClick={saveProfile} disabled={savingProfile} style={{ alignSelf:'flex-start', display:'flex', alignItems:'center', gap:'8px' }}>
-          <Save size={16} /> {savingProfile ? 'Saving…' : 'Save Profile'}
-        </button>
       </div>
+
+      {/* Allergies & Medical Conditions */}
+      <div className="glass-panel" style={{ padding:'24px', display:'flex', flexDirection:'column', gap:'18px' }}>
+        <h4 style={{ margin:0, display:'flex', alignItems:'center', gap:'8px' }}>
+          <Heart size={17} color="var(--error)" /> Health Details
+        </h4>
+        <p style={{ color:'var(--text-muted)', fontSize:'0.82rem', margin:0 }}>
+          Your personal allergies and medical conditions. This information is used in your health reports and AI assistant.
+        </p>
+
+        <div className="form-group" style={{ marginBottom:0 }}>
+          <label style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+            <AlertTriangle size={13} color="var(--warning)" /> Known Allergies
+          </label>
+          <input
+            className="form-control"
+            placeholder="e.g. Penicillin, Sulfa drugs, Nuts, Dust…"
+            value={profile.allergies}
+            onChange={e => setProfile(p => ({ ...p, allergies: e.target.value }))}
+          />
+          <span style={{ fontSize:'0.72rem', color:'var(--text-muted)', marginTop:'2px', display:'block' }}>
+            Separate multiple allergies with commas.
+          </span>
+        </div>
+
+        <div className="form-group" style={{ marginBottom:0 }}>
+          <label style={{ display:'flex', alignItems:'center', gap:'6px' }}>
+            <Heart size={13} color="var(--error)" /> Medical Conditions
+          </label>
+          <input
+            className="form-control"
+            placeholder="e.g. Type 2 Diabetes, Hypertension, Asthma…"
+            value={profile.medicalConditions}
+            onChange={e => setProfile(p => ({ ...p, medicalConditions: e.target.value }))}
+          />
+          <span style={{ fontSize:'0.72rem', color:'var(--text-muted)', marginTop:'2px', display:'block' }}>
+            Chronic or ongoing conditions you'd like tracked.
+          </span>
+        </div>
+
+        {/* Preview badges */}
+        {(profile.allergies || profile.medicalConditions) && (
+          <div style={{ display:'flex', flexDirection:'column', gap:'8px', padding:'12px', background:'rgba(255,255,255,0.03)', borderRadius:'12px', border:'1px solid var(--surface-border)' }}>
+            <div style={{ fontSize:'0.72rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.06em', color:'var(--text-muted)' }}>Preview</div>
+            {profile.allergies && (
+              <div style={{ fontSize:'0.78rem', color:'var(--warning)', background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', borderRadius:'8px', padding:'6px 10px', display:'flex', alignItems:'center', gap:'6px' }}>
+                <AlertTriangle size={12} /> {profile.allergies}
+              </div>
+            )}
+            {profile.medicalConditions && (
+              <div style={{ fontSize:'0.78rem', color:'var(--error)', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:'8px', padding:'6px 10px', display:'flex', alignItems:'center', gap:'6px' }}>
+                <Heart size={12} /> {profile.medicalConditions}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Single save button for both sections */}
+      <button className="btn-primary" onClick={saveProfile} disabled={savingProfile} style={{ alignSelf:'flex-start', display:'flex', alignItems:'center', gap:'8px' }}>
+        <Save size={16} /> {savingProfile ? 'Saving…' : 'Save Profile'}
+      </button>
 
       {/* Change password */}
       <div className="glass-panel" style={{ padding:'24px', display:'flex', flexDirection:'column', gap:'18px' }}>

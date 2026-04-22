@@ -5,7 +5,7 @@ import api from '../api';
 
 const RELATIONS    = ['Spouse','Parent','Child','Sibling','Grandparent','Grandchild','Friend','Caregiver','Other'];
 const BLOOD_GROUPS = ['A+','A-','B+','B-','AB+','AB-','O+','O-'];
-const emptyForm    = { name:'', relation:'', age:'', email:'', bloodGroup:'', allergies:'', medicalConditions:'' };
+const emptyForm    = { name:'', relation:'', age:'', email:'', caregiverName:'', bloodGroup:'', allergies:'', medicalConditions:'' };
 
 export default function FamilyMembers() {
   const [members, setMembers]         = useState([]);
@@ -33,7 +33,8 @@ export default function FamilyMembers() {
     if (member) {
       setEditingMember(member);
       setForm({ name:member.name||'', relation:member.relation||'', age:member.age||'',
-                email:member.email||'', bloodGroup:member.bloodGroup||'',
+                email:member.email||'', caregiverName:member.caregiverName||'',
+                bloodGroup:member.bloodGroup||'',
                 allergies:member.allergies||'', medicalConditions:member.medicalConditions||'' });
     } else {
       setEditingMember(null);
@@ -51,6 +52,7 @@ export default function FamilyMembers() {
       name: form.name.trim(), relation: form.relation,
       age: form.age ? parseInt(form.age, 10) : null,
       email: form.email.trim() || null,
+      caregiverName: form.caregiverName.trim() || null,
       bloodGroup: form.bloodGroup || null,
       allergies: form.allergies || null,
       medicalConditions: form.medicalConditions || null,
@@ -362,13 +364,19 @@ export default function FamilyMembers() {
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom:0 }}>
-                <label>Caregiver Email (optional)</label>
-                <input className="form-control" type="email" placeholder="caregiver@email.com" value={form.email} onChange={e => setField('email', e.target.value)} />
-                <span style={{ fontSize:'0.72rem', color:'var(--text-muted)', marginTop:'4px', display:'block' }}>
-                  This email gets missed-dose alerts AND can view this person's dose history.
-                </span>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px' }}>
+                <div className="form-group" style={{ marginBottom:0 }}>
+                  <label>Caregiver Name (optional)</label>
+                  <input className="form-control" placeholder="e.g. Dr. Sharma" value={form.caregiverName} onChange={e => setField('caregiverName', e.target.value)} />
+                </div>
+                <div className="form-group" style={{ marginBottom:0 }}>
+                  <label>Caregiver Email (optional)</label>
+                  <input className="form-control" type="email" placeholder="caregiver@email.com" value={form.email} onChange={e => setField('email', e.target.value)} />
+                </div>
               </div>
+              <span style={{ fontSize:'0.72rem', color:'var(--text-muted)', marginTop:'-8px', display:'block' }}>
+                The caregiver gets missed-dose alerts AND can view this person's dose history.
+              </span>
 
               <div className="form-group" style={{ marginBottom:0 }}>
                 <label style={{ display:'flex', alignItems:'center', gap:'5px' }}><AlertTriangle size={12} color="var(--warning)" /> Allergies</label>

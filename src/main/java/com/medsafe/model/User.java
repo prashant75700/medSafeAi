@@ -41,6 +41,9 @@ public class User {
 
     private String bloodGroup; // e.g. "A+", "O-", "B+", "AB+"
 
+    private String allergies;         // free text — e.g. "Penicillin, Nuts"
+    private String medicalConditions; // chronic conditions — e.g. "Type 2 Diabetes"
+
     private LocalDateTime createdAt;
 
     // null = pre-OTP user (treated as verified), false = pending, true = verified

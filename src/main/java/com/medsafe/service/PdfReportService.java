@@ -64,8 +64,8 @@ public class PdfReportService {
                 safe(user.getEmail()),
                 safe(user.getPhone()),
                 safe(user.getBloodGroup()),
-                "—",    // allergies not on User model
-                "—"     // conditions not on User model
+                safe(user.getAllergies()),
+                safe(user.getMedicalConditions())
         );
 
         return buildPdf(info, medicines, interactions, reportTitle);
@@ -172,20 +172,24 @@ public class PdfReportService {
                 canvas.fill();
             }
 
-            // Text positioned to the right of logo, vertically aligned
-            float textX = logoX + logoSize + 14;
+            // Text positioned to the right of logo — vertically centred as a pair
+            float textX       = logoX + logoSize + 14;
+            float logoCenter  = logoY + logoSize / 2f;
             Font logoFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20, WHITE);
             Font logoSub  = FontFactory.getFont(FontFactory.HELVETICA, 10, new Color(148, 163, 184));
+            // Actual text block vertical bounds adjustment (compensating for string baseline vs visual center)
+            // Title ascent is ~14pt. Subtitle descent is ~2pt. 
+            // Setting title baseline to +2 and subtitle to -15 puts the visual top at +16 and bottom at -17 (perfect center).
             ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
-                new Phrase("MedSafe AI", logoFont), textX, logoY + logoSize - 12, 0);
+                new Phrase("MedSafe AI", logoFont), textX, logoCenter + 2, 0);
             ColumnText.showTextAligned(canvas, Element.ALIGN_LEFT,
-                new Phrase(reportTitle, logoSub), textX, logoY + logoSize - 28, 0);
+                new Phrase(reportTitle, logoSub), textX, logoCenter - 15, 0);
 
             Font dateFont = FontFactory.getFont(FontFactory.HELVETICA, 9, new Color(148, 163, 184));
             String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
             ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT,
                 new Phrase("Generated: " + dateStr, dateFont),
-                PageSize.A4.getWidth() - 44, logoY + logoSize - 12, 0);
+                PageSize.A4.getWidth() - 44, logoCenter - 4, 0);
 
             doc.add(new Paragraph(" "));
             doc.add(new Paragraph(" "));
