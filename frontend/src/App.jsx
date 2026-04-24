@@ -32,7 +32,27 @@ export default function App() {
     typeof window !== 'undefined' ? window.innerWidth > 768 : true
   );
 
-  const token = localStorage.getItem('medsafe_token');
+  let token = localStorage.getItem('medsafe_token');
+
+  // Verify token expiration on load/render
+  if (token) {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const payload = JSON.parse(atob(base64));
+      
+      if (payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem('medsafe_token');
+        localStorage.removeItem('medsafe_user');
+        localStorage.removeItem('medsafe_profile');
+        token = null; // User will be logged out immediately
+      }
+    } catch (e) {
+      localStorage.removeItem('medsafe_token');
+      token = null;
+    }
+  }
+
   const profileJson = localStorage.getItem('medsafe_profile') || localStorage.getItem('medsafe_user');
   const user = profileJson ? (() => { try { return JSON.parse(profileJson); } catch { return null; } })() : null;
 
