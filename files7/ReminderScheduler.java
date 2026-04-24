@@ -33,11 +33,11 @@ public class ReminderScheduler {
     private static final DateTimeFormatter TIME_FMT    = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DISPLAY_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm");
 
-    // ----------------------------------------------------------------
+    // ────────────────────────────────────────────────────────────────
     // 1. Reminder scheduler — runs every minute
     //    Creates a PENDING dose log and sends a reminder email for any
     //    dose whose scheduled time falls in the next 0-5 minutes.
-    //----------------------------------------------------------------
+    // ────────────────────────────────────────────────────────────────
     @Scheduled(cron = "0 * * * * *")
     public void checkAndSendReminders() {
         log.debug("ReminderScheduler running at {}", LocalDateTime.now());
@@ -55,13 +55,13 @@ public class ReminderScheduler {
         }
     }
 
-    //----------------------------------------------------------------
+    // ────────────────────────────────────────────────────────────────
     // 2. Auto-missed detector — runs every 15 minutes
     //    Any dose log still PENDING more than 30 minutes after its
     //    scheduled time is automatically marked MISSED.
     //    • For personal medicines   → emails the account holder
     //    • For family-member meds   → emails the caregiver (member.email)
-    //----------------------------------------------------------------
+    // ────────────────────────────────────────────────────────────────
     @Scheduled(fixedDelay = 15 * 60 * 1000)   // 15 minutes, ms
     public void autoMarkMissedAndNotify() {
         LocalDateTime cutoff = LocalDateTime.now().minusMinutes(30);
@@ -72,19 +72,21 @@ public class ReminderScheduler {
         if (stalePending.isEmpty()) return;
         log.info("Auto-missed check: {} stale PENDING log(s) found", stalePending.size());
 
-        for (DoseLog doseLog : stalePending) {
+        for (DoseLog log : stalePending) {
             // Mark MISSED
-            doseLog.setStatus("MISSED");
-            doseLog.setLoggedAt(LocalDateTime.now());
-            doseLogRepository.save(doseLog);
-            log.info("Auto-marked MISSED: log={} medicine={}", doseLog.getId(), doseLog.getMedicineName());
+            log.setStatus("MISSED");
+            log.setLoggedAt(LocalDateTime.now());
+            doseLogRepository.save(log);
+            log.info("Auto-marked MISSED: log={} medicine={}", log.getId(), log.getMedicineName());
 
             // Fire appropriate alert
-            sendAutoMissedAlert(doseLog);
+            sendAutoMissedAlert(log);
         }
     }
 
+    // ────────────────────────────────────────────────────────────────
     // Private helpers
+    // ────────────────────────────────────────────────────────────────
 
     private void processSlot(Medicine medicine, String timeSlot,
                               LocalDateTime now, LocalDateTime windowEnd) {
